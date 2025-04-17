@@ -17,6 +17,5 @@ namespace MemberSystem.Domain.Interfaces
         Task SaveChangesAsync();
 
         // Sadece User entity için kullanılacak metot
-        Task<User> GetUserByPhonePasswordAsync(string phoneNumber, string password);
     }
 }

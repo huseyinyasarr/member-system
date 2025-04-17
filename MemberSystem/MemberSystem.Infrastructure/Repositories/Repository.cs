@@ -50,16 +50,5 @@ namespace MemberSystem.Infrastructure.Repositories
             await _context.SaveChangesAsync();
         }
 
-        // Yalnızca User tipi için implemente edilecek metod
-        public async Task<User> GetUserByPhonePasswordAsync(string phoneNumber, string password)
-        {
-            // Bu metod yalnızca T tipi User olduğunda anlamlıdır.
-            if (typeof(T) != typeof(User))
-                throw new InvalidOperationException("GetUserByPhonePasswordAsync metodu yalnızca User entity tipi için kullanılabilir.");
-
-            // _context.Set<User>() ile sorgulama yapıyoruz.
-            return await _context.Set<User>()
-                .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber && u.Password == password);
-        }
     }
 }
