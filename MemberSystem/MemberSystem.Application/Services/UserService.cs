@@ -46,5 +46,11 @@ namespace MemberSystem.Business.Services
                 await _memberRepository.SaveChangesAsync();
             }
         }
+
+        // PhoneNumber ve Password'a göre kullanıcı döndüren metod
+        public async Task<User> GetUserByPhonePasswordAsync(string phoneNumber, string password)
+        {
+            return await _memberRepository.GetUserByPhonePasswordAsync(phoneNumber, password);
+        }
     }
 }

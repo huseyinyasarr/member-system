@@ -1,8 +1,10 @@
 ﻿using MemberSystem.Domain.Interfaces;
 using MemberSystem.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MemberSystem.Domain.Entities;
 
 namespace MemberSystem.Infrastructure.Repositories
 {
@@ -14,6 +16,9 @@ namespace MemberSystem.Infrastructure.Repositories
         {
             _context = context;
         }
+
+        // Generic DbSet olarak Users property’si
+        public object Users => _context.Set<T>();
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
@@ -43,6 +48,18 @@ namespace MemberSystem.Infrastructure.Repositories
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();
+        }
+
+        // Yalnızca User tipi için implemente edilecek metod
+        public async Task<User> GetUserByPhonePasswordAsync(string phoneNumber, string password)
+        {
+            // Bu metod yalnızca T tipi User olduğunda anlamlıdır.
+            if (typeof(T) != typeof(User))
+                throw new InvalidOperationException("GetUserByPhonePasswordAsync metodu yalnızca User entity tipi için kullanılabilir.");
+
+            // _context.Set<User>() ile sorgulama yapıyoruz.
+            return await _context.Set<User>()
+                .FirstOrDefaultAsync(u => u.PhoneNumber == phoneNumber && u.Password == password);
         }
     }
 }

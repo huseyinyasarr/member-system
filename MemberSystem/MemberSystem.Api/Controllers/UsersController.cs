@@ -1,4 +1,5 @@
-﻿using MemberSystem.Business.Interfaces;  // Burada artık IUserService tanımlı olmalı
+﻿using MemberSystem.Api.Dtos;
+using MemberSystem.Business.Interfaces;  // Burada artık IUserService tanımlı olmalı
 using MemberSystem.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -15,6 +16,25 @@ namespace MemberSystem.Api.Controllers
         public UsersController(IUserService userService)
         {
             _userService = userService;
+        }
+
+        [HttpPost("login")]
+        public async Task<ActionResult<IEnumerable<User>>> Login([FromBody] LoginDto loginDto)
+        {
+            // 1) Kullanıcıyı telefon ve şifre ile bulmaya çalış
+            var user = await _userService.GetUserByPhonePasswordAsync(loginDto.PhoneNumber, loginDto.Password);
+            if (user == null)
+            {
+                // Hatalı giriş
+                return Unauthorized("Telefon numarası veya şifre hatalı.");
+            }
+
+            // 2) Giriş başarılıysa tüm kullanıcıları getirip döndürebiliriz
+            //    (Tamamen proje gereksinimlerinize göre tasarlayabilirsiniz)
+            var allUsers = await _userService.GetUsersAsync();
+
+            // 3) Kullanıcıya döndürülecek veriyi biçimlendirebilirsiniz
+            return Ok(allUsers);
         }
 
         // Tüm kullanıcıları listeleyen GET metodu.

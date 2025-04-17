@@ -25,6 +25,12 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseCors(options =>
+{
+    options.WithOrigins("http://localhost:3000", "https://localhost:5001")
+           .AllowAnyMethod()
+           .AllowAnyHeader();
+});
 // Geliþtirme ortamýnda Swagger’ý kullanýn.
 if (app.Environment.IsDevelopment())
 {
