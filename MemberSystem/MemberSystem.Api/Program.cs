@@ -1,3 +1,4 @@
+using System.Text;
 using MemberSystem.Business.Interfaces;
 using MemberSystem.Business.Services;
 using MemberSystem.Domain.Entities;
@@ -5,6 +6,7 @@ using MemberSystem.Domain.Interfaces;
 using MemberSystem.Infrastructure.Data;
 using MemberSystem.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAuthentication("User")
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new ()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Token:Issuer"],
+            ValidAudience = builder.Configuration["Token:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:SecurityKey"]))
+        };
+    });
+
 var app = builder.Build();
 
 app.UseCors(options =>
@@ -39,6 +57,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
