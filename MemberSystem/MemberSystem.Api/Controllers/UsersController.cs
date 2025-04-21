@@ -19,15 +19,13 @@ namespace MemberSystem.Api.Controllers
             _userService = userService;
         }
 
-        // Tüm kullanıcıları listeleyen GET metodu.
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            var users = await _userService.GetUsersAsync(); // Doğru metot adı
+            var users = await _userService.GetUsersAsync();
             return Ok(users);
         }
 
-        // Belirtilen id’li kullanıcıyı dönen GET metodu.
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(int id)
         {
@@ -37,7 +35,8 @@ namespace MemberSystem.Api.Controllers
             return Ok(user);
         }
 
-        // Yeni kullanıcı ekleyen POST metodu.
+        // Removed the invalid [Unauthorize] attribute
+        [AllowAnonymous] // Use this attribute to allow access without authentication
         [HttpPost]
         public async Task<ActionResult> PostUser([FromBody] User user)
         {
@@ -45,7 +44,6 @@ namespace MemberSystem.Api.Controllers
             return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
         }
 
-        // Mevcut kullanıcının güncellenmesi için PUT metodu.
         [HttpPut("{id}")]
         public async Task<ActionResult> PutUser(int id, [FromBody] User user)
         {
@@ -55,7 +53,6 @@ namespace MemberSystem.Api.Controllers
             return NoContent();
         }
 
-        // Kullanıcının silinmesi için DELETE metodu.
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteUser(int id)
         {
