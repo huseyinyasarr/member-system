@@ -8,55 +8,44 @@ namespace MemberSystem.Business.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IRepository<User> _memberRepository;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IRepository<User> memberRepository)
         {
-            _userRepository = userRepository;
-        }
-
-        public async Task<User> AuthenticateUserAsync(string phoneNumber, string password)
-        {
-            return await _userRepository.GetByPhoneNumberAsync(phoneNumber);
-            // Şifre kontrolü burada YAPILMALI (örneğin, hash karşılaştırması)
-            // Şu anda sadece kullanıcı varlığını kontrol ediyor.
+            _memberRepository = memberRepository;
         }
 
         public async Task<IEnumerable<User>> GetUsersAsync()
         {
-            return await _userRepository.GetAllAsync();
+            return await _memberRepository.GetAllAsync();
         }
 
         public async Task<User> GetUserByIdAsync(int id)
         {
-            return await _userRepository.GetByIdAsync(id);
+            return await _memberRepository.GetByIdAsync(id);
         }
 
-        public async Task AddUserAsync(User user)
+        public async Task AddUserAsync(User member)
         {
-            await _userRepository.AddAsync(user);
-            await _userRepository.SaveChangesAsync();
+            await _memberRepository.AddAsync(member);
+            await _memberRepository.SaveChangesAsync();
         }
 
-        public async Task UpdateUserAsync(User user)
+        public async Task UpdateUserAsync(User member)
         {
-            _userRepository.Update(user);
-            await _userRepository.SaveChangesAsync();
+            _memberRepository.Update(member);
+            await _memberRepository.SaveChangesAsync();
         }
 
         public async Task DeleteUserAsync(int id)
         {
-            var user = await _userRepository.GetByIdAsync(id);
-            if (user != null)
+            var member = await _memberRepository.GetByIdAsync(id);
+            if (member != null)
             {
-                _userRepository.Delete(user);
-                await _userRepository.SaveChangesAsync();
+                _memberRepository.Delete(member);
+                await _memberRepository.SaveChangesAsync();
             }
         }
 
-        public async Task<User> GetByPhoneNumberAsync(string phoneNumber)
-        {
-            return await _userRepository.GetByPhoneNumberAsync(phoneNumber);
-        }
     }
 }

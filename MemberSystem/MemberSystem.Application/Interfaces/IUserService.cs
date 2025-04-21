@@ -11,7 +11,5 @@ namespace MemberSystem.Business.Interfaces
         Task AddUserAsync(User user);
         Task UpdateUserAsync(User user);
         Task DeleteUserAsync(int id);
-        Task<User> GetByPhoneNumberAsync(string phoneNumber);
-        Task<User> AuthenticateUserAsync(string phoneNumber, string password); // Dönüş tipi güncellendi
     }
 }

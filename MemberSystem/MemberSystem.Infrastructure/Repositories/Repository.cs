@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MemberSystem.Domain.Entities;
-using System.Linq.Expressions;
 
 namespace MemberSystem.Infrastructure.Repositories
 {
@@ -31,11 +30,6 @@ namespace MemberSystem.Infrastructure.Repositories
             return await _context.Set<T>().FindAsync(id);
         }
 
-        //public async Task<User> SingleOrDefaultAsync(Expression<Func<User, bool>> predicate)
-        //{
-        //    return await _context.Users.SingleOrDefaultAsync(predicate);
-        //}
-
         public async Task AddAsync(T entity)
         {
             await _context.Set<T>().AddAsync(entity);
@@ -55,7 +49,6 @@ namespace MemberSystem.Infrastructure.Repositories
         {
             await _context.SaveChangesAsync();
         }
-
 
     }
 }

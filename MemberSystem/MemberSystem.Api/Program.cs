@@ -1,86 +1,45 @@
-﻿using System.Text;
+using System.Text;
 using MemberSystem.Business.Interfaces;
 using MemberSystem.Business.Services;
 using MemberSystem.Domain.Entities;
 using MemberSystem.Domain.Interfaces;
 using MemberSystem.Infrastructure.Data;
 using MemberSystem.Infrastructure.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using MemberSystem.Api.Modeller;
-using Microsoft.OpenApi.Models; // JwtTokenSettings modelini kullanabilmek için bu using ifadesini ekledik
 
 var builder = WebApplication.CreateBuilder(args);
 
-// JWT Ayarlarını Yapılandırma (appsettings.json'dan okuma)
-//builder.Services.Configure<JwtTokenSettings>(builder.Configuration.GetSection("JwtTokenSettings"));
-
-builder.Services.Configure<MemberSystem.Api.Modeller.JwtTokenSettings>(builder.Configuration.GetSection("JwtTokenSettings"));
-
-// JWT Kimlik Doğrulaması Yapılandırması
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        var jwtTokenSettings = builder.Configuration.GetSection("JwtTokenSettings").Get<JwtTokenSettings>();
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtTokenSettings.Issuer,
-            ValidAudience = jwtTokenSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtTokenSettings.SecretKey)),
-            ClockSkew = TimeSpan.Zero // İsteğe bağlı: Token süresinin hemen dolması için
-        };
-    });
-
-// DbContext için MsSQL bağlantısını yapılandırın.
+// DbContext i�in MsSQL ba�lant�s�n� yap�land�r�n.
 builder.Services.AddDbContext<UserSystemDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Repository ve Business servislerini enjekte edin.
 builder.Services.AddScoped<IRepository<User>, Repository<User>>();
-builder.Services.AddScoped<IUserRepository, UserRepository>(); // Özel UserRepository'i kaydettik
 builder.Services.AddScoped<IUserService, UserService>();
 
-// Controller’ları ekleyin.
+// Controller�lar� ekleyin.
 builder.Services.AddControllers();
 
-// Swagger/OpenAPI desteği ekleyin.
+// Swagger/OpenAPI deste�i ekleyin.
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen();
 
-builder.Services.AddSwaggerGen(c =>
-{
-
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+builder.Services.AddAuthentication("User")
+    .AddJwtBearer(options =>
     {
-        Description = "JWT Authorization header using the Bearer scheme. Example: \"Bearer {token}\"",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-
-    // Güvenlik gereksinimlerini belirtme (hangi endpointlerin yetkilendirme gerektirdiğini tanımlar)
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
+        options.TokenValidationParameters = new ()
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Token:Issuer"],
+            ValidAudience = builder.Configuration["Token:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Token:SecurityKey"]))
+        };
     });
-});
 
 var app = builder.Build();
 
@@ -90,8 +49,7 @@ app.UseCors(options =>
            .AllowAnyMethod()
            .AllowAnyHeader();
 });
-
-// Geliştirme ortamında Swagger’ı kullanın.
+// Geli�tirme ortam�nda Swagger�� kullan�n.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -100,11 +58,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // Kimlik doğrulama middleware'ini ekleyin
+app.UseAuthentication();
 
-app.UseAuthorization();  // Yetkilendirme middleware'ini ekleyin
+app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-
